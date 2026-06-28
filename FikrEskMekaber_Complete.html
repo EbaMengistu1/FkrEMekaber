@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FikrEskMekaber - Ethiopian Dating</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{--primary:#D32F2F;--primary-light:#ffebee;--text-primary:#1a1a1a;--text-secondary:#666;--border:#e0e0e0;--surface-1:#fff;--surface-2:#f5f5f5;--success:#4caf50;}
+    html,body{width:100%;height:100%;font-family:'Poppins',sans-serif;}
+    .app-container{width:100%;max-width:400px;height:100vh;margin:0 auto;background:var(--surface-2);display:flex;flex-direction:column;overflow:hidden;}
+    .screen{display:none;flex-direction:column;height:100%;}
+    .screen.active{display:flex;}
+    .top-bar{padding:12px 16px;display:flex;align-items:center;gap:10px;background:var(--surface-1);border-bottom:1px solid var(--border);z-index:50;}
+    .logo{font-size:18px;font-weight:700;color:var(--primary);flex:1;}
+    .content{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch;}
+    .h2{font-size:19px;font-weight:600;margin-bottom:6px;}
+    .sub{font-size:13px;color:var(--text-secondary);margin-bottom:14px;}
+    .btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,var(--primary),#FF5252);color:#fff;font-size:14px;font-weight:600;border:none;border-radius:10px;cursor:pointer;margin-top:10px;}
+    .field-wrap{margin-bottom:12px;}
+    .field-label{font-size:11px;color:var(--text-secondary);font-weight:600;margin-bottom:4px;display:block;}
+    .field-input,.field-input select,.field-input textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-1);font-size:13px;font-family:'Poppins',sans-serif;}
+    .field-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-light);}
+    .profile-card{background:var(--surface-1);border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+    .profile-img{width:100%;height:250px;object-fit:cover;}
+    .profile-info{padding:14px;}
+    .profile-header{display:flex;gap:12px;margin-bottom:10px;}
+    .profile-avatar{width:50px;height:50px;border-radius:10px;object-fit:cover;border:2px solid var(--primary-light);}
+    .profile-details{flex:1;}
+    .profile-name{font-size:15px;font-weight:600;}
+    .profile-sub{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+    .badge-verified{display:inline-flex;align-items:center;gap:4px;background:rgba(76,175,80,.15);color:var(--success);font-size:10px;font-weight:600;padding:3px 8px;border-radius:8px;margin-top:4px;}
+    .profile-tags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;}
+    .profile-tag{background:var(--primary-light);color:var(--primary);font-size:11px;padding:4px 10px;border-radius:6px;font-weight:500;}
+    .action-row{display:flex;gap:12px;margin-top:10px;justify-content:center;}
+    .action-btn{border:none;cursor:pointer;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surface-2);color:var(--text-secondary);}
+    .btn-like{width:56px;height:56px;background:linear-gradient(135deg,var(--primary),#FF5252);color:#fff;}
+    .bnav{display:flex;justify-content:space-around;padding:8px 0 12px;background:var(--surface-1);border-top:1px solid var(--border);}
+    .bnav-item{border:none;background:none;cursor:pointer;color:var(--text-secondary);font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:600;}
+    .bnav-item.act{color:var(--primary);}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;}
+    .modal.show{display:flex;}
+    .modal-content{background:#fff;border-radius:14px;padding:20px;text-align:center;max-width:90%;max-height:80vh;overflow-y:auto;}
+    .photo-preview{width:100px;height:100px;border-radius:10px;margin:10px auto;object-fit:cover;border:2px solid var(--primary-light);}
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- HOME -->
+  <div class="screen active" id="s-home">
+    <div class="top-bar"><div class="logo">FikrEskMekaber</div></div>
+    <div class="content" style="display:flex;flex-direction:column;justify-content:center;text-align:center;background:linear-gradient(135deg,#FF1744,#FF6E40,#FFB6C1);color:#fff;padding:40px 20px;">
+      <div style="font-size:56px;margin-bottom:16px;animation:bounce 2s infinite;">💕</div>
+      <div style="font-size:28px;font-weight:700;margin-bottom:8px;">Love at First Swipe</div>
+      <div style="font-size:15px;margin-bottom:28px;opacity:.95;">Find your perfect match</div>
+      <button class="btn-primary" onclick="go('s-verify')" style="background:#fff;color:#FF1744;margin-top:20px;"><i class="fas fa-phone"></i> Verify & Start</button>
+    </div>
+  </div>
+
+  <!-- VERIFY SMS -->
+  <div class="screen" id="s-verify">
+    <div class="top-bar"><button onclick="go('s-home')" style="border:none;background:none;cursor:pointer;font-size:18px;"><i class="fas fa-arrow-left"></i></button><div class="logo">SMS Verify</div></div>
+    <div class="content">
+      <div class="h2">Verify your number</div>
+      <div class="sub">We'll send a code to your phone</div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-phone"></i> Phone *</label>
+        <div style="display:flex;gap:8px;">
+          <select id="country-code" style="flex:0 0 80px;padding:10px;border-radius:8px;border:1px solid var(--border);"><option value="+251">🇪🇹+251</option><option value="+1">🇺🇸+1</option><option value="+44">🇬🇧+44</option></select>
+          <input class="field-input" id="phone-num" type="tel" placeholder="913623851">
+        </div>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-id-card"></i> Fayida ID *</label>
+        <input class="field-input" id="fcn-id" type="text" placeholder="Enter 16-digit ID" maxlength="16">
+      </div>
+
+      <button class="btn-primary" onclick="sendSMS()"><i class="fas fa-sms"></i> Send verification code</button>
+      <div style="margin-top:20px;padding:12px;background:rgba(76,175,80,.15);border-radius:8px;font-size:12px;color:var(--success);text-align:center;font-weight:500;">
+        🔐 Verify you are a real person
+      </div>
+    </div>
+  </div>
+
+  <!-- VERIFY CODE -->
+  <div class="screen" id="s-sms-code">
+    <div class="top-bar"><button onclick="go('s-verify')" style="border:none;background:none;cursor:pointer;font-size:18px;"><i class="fas fa-arrow-left"></i></button><div class="logo">Enter code</div></div>
+    <div class="content" style="display:flex;flex-direction:column;justify-content:center;text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">📱</div>
+      <div class="h2">Enter 6-digit code</div>
+      <div class="sub" id="code-sent-to">Code sent to +251...</div>
+
+      <div class="field-wrap" style="margin-top:20px;">
+        <input class="field-input" id="sms-code" type="text" placeholder="000000" maxlength="6" style="font-size:28px;text-align:center;letter-spacing:8px;">
+      </div>
+
+      <button class="btn-primary" onclick="verifySMS()"><i class="fas fa-check"></i> Verify</button>
+      <button style="background:none;border:1px solid var(--border);color:var(--text-secondary);padding:10px;border-radius:8px;margin-top:8px;width:100%;" onclick="sendSMS()"><i class="fas fa-redo"></i> Resend</button>
+    </div>
+  </div>
+
+  <!-- CREATE PROFILE -->
+  <div class="screen" id="s-create-profile">
+    <div class="top-bar"><div class="logo">Create Profile</div></div>
+    <div class="content">
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-image"></i> Profile Photo</label>
+        <input type="file" id="photo-upload" accept="image/*" onchange="uploadPhoto(event)" style="display:none;">
+        <button onclick="document.getElementById('photo-upload').click()" style="width:100%;padding:10px;border:2px dashed var(--primary);background:none;border-radius:8px;cursor:pointer;color:var(--primary);font-weight:600;">📸 Choose Photo</button>
+        <img id="photo-preview" style="width:100px;height:100px;border-radius:10px;margin-top:10px;object-fit:cover;border:2px solid var(--primary-light);">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-user"></i> Name *</label>
+        <input class="field-input" id="p-name" type="text" placeholder="Your name">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-birthday-cake"></i> Age *</label>
+        <input class="field-input" id="p-age" type="number" placeholder="25" min="18" max="100">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-map-marker-alt"></i> Region *</label>
+        <select class="field-input" id="p-region">
+          <option value="">Select region</option>
+          <option>Tigray</option><option>Afar</option><option>Amhara</option><option>Oromia</option>
+          <option>Somali</option><option>Benishangul-Gumuz</option><option>Gambela</option><option>Harari</option>
+          <option>SNNPR</option><option>Addis Ababa</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-heart"></i> Religion *</label>
+        <select class="field-input" id="p-religion">
+          <option value="">Select religion</option>
+          <option>Orthodox Christian</option><option>Muslim</option><option>Protestant</option><option>Catholic</option><option>Other</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-ruler-vertical"></i> Height (cm) *</label>
+        <input class="field-input" id="p-height" type="number" placeholder="178">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-weight"></i> Weight (kg) *</label>
+        <input class="field-input" id="p-weight" type="number" placeholder="70">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-palette"></i> Skin Tone *</label>
+        <select class="field-input" id="p-skin">
+          <option value="">Select</option>
+          <option>Fair</option><option>Light Brown</option><option>Brown</option><option>Dark Brown</option><option>Prefer not to say</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-hair-length"></i> Hair Color *</label>
+        <select class="field-input" id="p-hair">
+          <option value="">Select</option>
+          <option>Black</option><option>Brown</option><option>Blonde</option><option>Red</option><option>Gray</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-book"></i> Education *</label>
+        <select class="field-input" id="p-education">
+          <option value="">Select</option>
+          <option>High School</option><option>Bachelor's</option><option>Master's</option><option>PhD</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-briefcase"></i> Profession</label>
+        <input class="field-input" id="p-profession" type="text" placeholder="Your job">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-hashtag"></i> Hobbies *</label>
+        <input class="field-input" id="p-hobbies" type="text" placeholder="Coffee, Travel, Music">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-heart-pulse"></i> Looking for *</label>
+        <select class="field-input" id="p-relationship">
+          <option value="">Select</option>
+          <option>Serious Relationship</option><option>Casual Dating</option><option>Friendship</option><option>Marriage</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-align-left"></i> Bio *</label>
+        <textarea class="field-input" id="p-bio" placeholder="Tell us about yourself..." style="height:80px;"></textarea>
+      </div>
+
+      <button class="btn-primary" onclick="createProfile()"><i class="fas fa-check"></i> Complete Profile</button>
+    </div>
+  </div>
+
+  <!-- DATING PROFILES (FELEGA) -->
+  <div class="screen" id="s-dating">
+    <div class="top-bar"><div class="logo">Felega</div><button onclick="go('s-profile-view')" style="border:none;background:none;cursor:pointer;font-size:18px;color:var(--primary);"><i class="fas fa-crown"></i></button></div>
+    <div class="content" id="profiles-container"></div>
+    <div class="bnav">
+      <button class="bnav-item act" onclick="go('s-dating')"><i class="fas fa-fire"></i>Felega</button>
+      <button class="bnav-item" onclick="go('s-matches')"><i class="fas fa-heart"></i>Matches</button>
+      <button class="bnav-item" onclick="go('s-messages')"><i class="fas fa-comments"></i>Messages</button>
+      <button class="bnav-item" onclick="go('s-profile-view')"><i class="fas fa-user-circle"></i>Me</button>
+    </div>
+  </div>
+
+  <!-- MATCHES -->
+  <div class="screen" id="s-matches">
+    <div class="top-bar"><div class="logo">My Matches</div></div>
+    <div class="content" id="matches-container"></div>
+    <div class="bnav">
+      <button class="bnav-item" onclick="go('s-dating')"><i class="fas fa-fire"></i>Felega</button>
+      <button class="bnav-item act"><i class="fas fa-heart"></i>Matches</button>
+      <button class="bnav-item" onclick="go('s-messages')"><i class="fas fa-comments"></i>Messages</button>
+      <button class="bnav-item" onclick="go('s-profile-view')"><i class="fas fa-user-circle"></i>Me</button>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="screen" id="s-messages">
+    <div class="top-bar"><div class="logo">Messages</div></div>
+    <div class="content" id="messages-list"></div>
+    <div class="bnav">
+      <button class="bnav-item" onclick="go('s-dating')"><i class="fas fa-fire"></i>Felega</button>
+      <button class="bnav-item" onclick="go('s-matches')"><i class="fas fa-heart"></i>Matches</button>
+      <button class="bnav-item act"><i class="fas fa-comments"></i>Messages</button>
+      <button class="bnav-item" onclick="go('s-profile-view')"><i class="fas fa-user-circle"></i>Me</button>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="screen" id="s-chat">
+    <div class="top-bar"><button onclick="go('s-messages')" style="border:none;background:none;cursor:pointer;font-size:18px;"><i class="fas fa-arrow-left"></i></button><div style="flex:1;"><div style="font-size:13px;font-weight:600;" id="chat-name">Kidist</div><div style="font-size:10px;color:var(--success);">🟢 Online</div></div></div>
+    <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+      <div style="flex:1;overflow-y:auto;padding:10px;-webkit-overflow-scrolling:touch;" id="chat-messages"></div>
+      <div style="display:flex;gap:6px;padding:8px 12px;background:var(--surface-1);border-top:1px solid var(--border);">
+        <input type="text" id="chat-input" placeholder="Type message..." style="flex:1;border:1px solid var(--border);border-radius:16px;padding:8px 12px;font-size:12px;font-family:Poppins;" onkeypress="if(event.key=='Enter')sendMsg()">
+        <button onclick="sendMsg()" style="border:none;background:var(--primary);color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY PROFILE -->
+  <div class="screen" id="s-profile-view">
+    <div class="top-bar"><div class="logo">My Profile</div><button onclick="go('s-edit-profile')" style="border:none;background:none;cursor:pointer;font-size:16px;color:var(--primary);"><i class="fas fa-edit"></i></button></div>
+    <div class="content" style="text-align:center;">
+      <img id="pv-photo" style="width:100px;height:100px;border-radius:16px;margin:14px auto;object-fit:cover;border:3px solid var(--primary-light);">
+      <div class="h2" id="pv-name">Your Name</div>
+      <div class="sub" id="pv-basic"></div>
+      <div class="badge-verified" style="justify-content:center;"><i class="fas fa-check-circle"></i> Verified</div>
+
+      <div style="background:var(--surface-1);border-radius:10px;padding:14px;margin:14px 0;text-align:left;">
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600;">ABOUT</div>
+        <div style="font-size:13px;color:var(--text-primary);line-height:1.6;" id="pv-bio">Bio here</div>
+      </div>
+
+      <div style="background:var(--surface-1);border-radius:10px;padding:14px;margin:14px 0;text-align:left;">
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600;">DETAILS</div>
+        <div style="font-size:12px;color:var(--text-primary);line-height:1.8;" id="pv-details"></div>
+      </div>
+    </div>
+    <div class="bnav">
+      <button class="bnav-item" onclick="go('s-dating')"><i class="fas fa-fire"></i>Felega</button>
+      <button class="bnav-item" onclick="go('s-matches')"><i class="fas fa-heart"></i>Matches</button>
+      <button class="bnav-item" onclick="go('s-messages')"><i class="fas fa-comments"></i>Messages</button>
+      <button class="bnav-item act"><i class="fas fa-user-circle"></i>Me</button>
+    </div>
+  </div>
+
+  <!-- EDIT PROFILE (COMPLETE) -->
+  <div class="screen" id="s-edit-profile">
+    <div class="top-bar"><button onclick="go('s-profile-view')" style="border:none;background:none;cursor:pointer;font-size:18px;"><i class="fas fa-arrow-left"></i></button><div class="logo">Edit Profile</div></div>
+    <div class="content">
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-image"></i> Change Photo</label>
+        <input type="file" id="edit-photo-upload" accept="image/*" onchange="editPhoto(event)" style="display:none;">
+        <button onclick="document.getElementById('edit-photo-upload').click()" style="width:100%;padding:10px;border:2px dashed var(--primary);background:none;border-radius:8px;cursor:pointer;color:var(--primary);font-weight:600;">📸 Change Photo</button>
+        <img id="edit-photo-preview" style="width:100px;height:100px;border-radius:10px;margin-top:10px;object-fit:cover;border:2px solid var(--primary-light);">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-user"></i> Name</label>
+        <input class="field-input" id="edit-name" type="text">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-birthday-cake"></i> Age</label>
+        <input class="field-input" id="edit-age" type="number">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-map-marker-alt"></i> Region</label>
+        <select class="field-input" id="edit-region">
+          <option>Tigray</option><option>Afar</option><option>Amhara</option><option>Oromia</option>
+          <option>Somali</option><option>Benishangul-Gumuz</option><option>Gambela</option><option>Harari</option>
+          <option>SNNPR</option><option>Addis Ababa</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-heart"></i> Religion</label>
+        <select class="field-input" id="edit-religion">
+          <option>Orthodox Christian</option><option>Muslim</option><option>Protestant</option><option>Catholic</option><option>Other</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-ruler-vertical"></i> Height (cm)</label>
+        <input class="field-input" id="edit-height" type="number">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-weight"></i> Weight (kg)</label>
+        <input class="field-input" id="edit-weight" type="number">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-palette"></i> Skin Tone</label>
+        <select class="field-input" id="edit-skin">
+          <option>Fair</option><option>Light Brown</option><option>Brown</option><option>Dark Brown</option><option>Prefer not to say</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-hair-length"></i> Hair Color</label>
+        <select class="field-input" id="edit-hair">
+          <option>Black</option><option>Brown</option><option>Blonde</option><option>Red</option><option>Gray</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-book"></i> Education</label>
+        <select class="field-input" id="edit-education">
+          <option>High School</option><option>Bachelor's</option><option>Master's</option><option>PhD</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-briefcase"></i> Profession</label>
+        <input class="field-input" id="edit-profession" type="text">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-hashtag"></i> Hobbies</label>
+        <input class="field-input" id="edit-hobbies" type="text">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-heart-pulse"></i> Looking for</label>
+        <select class="field-input" id="edit-relationship">
+          <option>Serious Relationship</option><option>Casual Dating</option><option>Friendship</option><option>Marriage</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label"><i class="fas fa-align-left"></i> Bio</label>
+        <textarea class="field-input" id="edit-bio" style="height:100px;"></textarea>
+      </div>
+
+      <button class="btn-primary" onclick="updateProfile()"><i class="fas fa-check"></i> Save Changes</button>
+    </div>
+  </div>
+
+</div>
+
+<style>
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+</style>
+
+<script>
+const profiles = [
+  {id:1,name:'Kidist',age:25,region:'Addis Ababa',religion:'Orthodox',height:165,weight:62,skin:'Brown',hair:'Black',education:'Bachelor\'s',profession:'Engineer',hobbies:'Coffee, Travel',relationship:'Serious',bio:'Love coffee and exploring!',photo:'🇪🇹👩‍💼'},
+  {id:2,name:'Emnet',age:26,region:'Oromia',religion:'Orthodox',height:168,weight:65,skin:'Brown',hair:'Black',education:'Master\'s',profession:'Doctor',hobbies:'Books, Music',relationship:'Serious',bio:'Healthcare pro with music passion',photo:'🇪🇹👩‍⚕️'},
+  {id:3,name:'Henok',age:27,region:'Addis Ababa',religion:'Orthodox',height:178,weight:75,skin:'Brown',hair:'Black',education:'Bachelor\'s',profession:'Developer',hobbies:'Tech, Sports',relationship:'Serious',bio:'Tech lover seeking real connection',photo:'🇪🇹👨‍💻'},
+];
+
+let userProfile = {photo:'🇪🇹👤'};
+let chatMsgs = {};
+let currentChat = null;
+let smsCode = '';
+let matches = [];
+
+function uploadPhoto(e){
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      userProfile.photo = event.target.result;
+      document.getElementById('photo-preview').src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function editPhoto(e){
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      userProfile.photo = event.target.result;
+      document.getElementById('edit-photo-preview').src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function sendSMS(){
+  const phone = document.getElementById('country-code').value + document.getElementById('phone-num').value;
+  const fcn = document.getElementById('fcn-id').value;
+  
+  if(!phone.slice(1) || phone.slice(1).length < 9){
+    alert('⚠️ Enter valid phone');
+    return;
+  }
+  if(!fcn || fcn.length !== 16){
+    alert('⚠️ Enter 16-digit Fayida ID');
+    return;
+  }
+
+  smsCode = String(Math.floor(Math.random()*1000000)).padStart(6,'0');
+  localStorage.setItem('smsCode', smsCode);
+  
+  alert('✅ Verification code sent!\n\nCode: ' + smsCode + '\n\n(Check your SMS inbox)');
+  document.getElementById('code-sent-to').textContent = 'Code sent to ' + phone;
+  go('s-sms-code');
+}
+
+function verifySMS(){
+  const entered = document.getElementById('sms-code').value;
+  
+  if(!entered || entered.length !== 6){
+    alert('⚠️ Enter 6-digit code');
+    return;
+  }
+  if(entered !== smsCode){
+    alert('⚠️ Wrong code!');
+    return;
+  }
+  
+  alert('✅ Verified!');
+  go('s-create-profile');
+}
+
+function createProfile(){
+  const p = {
+    name: document.getElementById('p-name').value,
+    age: document.getElementById('p-age').value,
+    region: document.getElementById('p-region').value,
+    religion: document.getElementById('p-religion').value,
+    height: document.getElementById('p-height').value,
+    weight: document.getElementById('p-weight').value,
+    skin: document.getElementById('p-skin').value,
+    hair: document.getElementById('p-hair').value,
+    education: document.getElementById('p-education').value,
+    profession: document.getElementById('p-profession').value,
+    hobbies: document.getElementById('p-hobbies').value,
+    relationship: document.getElementById('p-relationship').value,
+    bio: document.getElementById('p-bio').value,
+    photo: userProfile.photo || '🇪🇹👤'
+  };
+  
+  if(!p.name || !p.age || !p.region){
+    alert('⚠️ Fill required fields');
+    return;
+  }
+  
+  userProfile = p;
+  updateProfileView();
+  go('s-dating');
+  loadProfiles();
+}
+
+function loadProfiles(){
+  const cont = document.getElementById('profiles-container');
+  cont.innerHTML = '';
+  profiles.forEach(p => {
+    cont.innerHTML += `
+      <div class="profile-card">
+        <div class="profile-img" style="font-size:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(211,47,47,.1),rgba(255,193,7,.1));">${p.photo}</div>
+        <div class="profile-info">
+          <div class="profile-header">
+            <div class="profile-avatar" style="font-size:32px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFB6C1,#FFD700);">${p.photo}</div>
+            <div class="profile-details">
+              <div class="profile-name">${p.name}, ${p.age}</div>
+              <div class="profile-sub">${p.profession} • ${p.region}</div>
+              <div class="badge-verified"><i class="fas fa-check-circle"></i> Verified</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin:8px 0;line-height:1.5;">${p.bio}</div>
+          <div class="action-row">
+            <button class="action-btn" onclick="alert('❌ Passed')"><i class="fas fa-times"></i></button>
+            <button class="action-btn btn-like" onclick="like(${p.id})"><i class="fas fa-heart"></i></button>
+            <button class="action-btn" onclick="alert('⭐ Super liked!')"><i class="fas fa-star"></i></button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function like(profileId){
+  const person = profiles.find(p => p.id === profileId);
+  if(!matches.find(m => m.id === profileId)){
+    matches.push(person);
+  }
+  alert('❤️ Liked ' + person.name + '!\n\nGo to Messages to chat');
+}
+
+function loadMatches(){
+  const cont = document.getElementById('matches-container');
+  cont.innerHTML = '';
+  matches.forEach(p => {
+    cont.innerHTML += `
+      <div class="profile-card" style="cursor:pointer;" onclick="startChat(${p.id},'${p.name}')">
+        <div style="padding:12px;display:flex;gap:12px;">
+          <div style="width:50px;height:50px;border-radius:10px;font-size:24px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFB6C1,#FFD700);">${p.photo}</div>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;">${p.name}</div>
+            <div style="font-size:11px;color:var(--success);">🟢 Online now</div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  if(matches.length === 0){
+    cont.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-secondary);"><div style="font-size:32px;margin-bottom:10px;">💔</div>No matches yet. Like someone to match!</div>';
+  }
+}
+
+function loadMessages(){
+  const cont = document.getElementById('messages-list');
+  cont.innerHTML = '';
+  matches.forEach(p => {
+    const hasMsg = chatMsgs[p.id] && chatMsgs[p.id].length > 0;
+    cont.innerHTML += `
+      <div class="profile-card" style="cursor:pointer;" onclick="startChat(${p.id},'${p.name}')">
+        <div style="padding:12px;display:flex;gap:12px;align-items:center;">
+          <div style="width:50px;height:50px;border-radius:10px;font-size:24px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFB6C1,#FFD700);">${p.photo}</div>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;">${p.name}</div>
+            <div style="font-size:11px;color:var(--text-secondary);">${hasMsg ? chatMsgs[p.id][chatMsgs[p.id].length-1].text.slice(0,30) : 'No messages yet'}</div>
+          </div>
+          <div style="font-size:10px;color:var(--text-secondary);">🟢</div>
+        </div>
+      </div>
+    `;
+  });
+  if(matches.length === 0){
+    cont.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-secondary);"><div style="font-size:32px;margin-bottom:10px;">💬</div>No messages. Start chatting!</div>';
+  }
+}
+
+function startChat(profileId, name){
+  currentChat = profileId;
+  document.getElementById('chat-name').textContent = name;
+  if(!chatMsgs[profileId]){
+    chatMsgs[profileId] = [{me:false,text:'Hey there! 👋'}];
+  }
+  go('s-chat');
+  setTimeout(() => displayChat(), 100);
+}
+
+function sendMsg(){
+  const inp = document.getElementById('chat-input');
+  if(!inp.value.trim())return;
+  
+  if(!chatMsgs[currentChat]) chatMsgs[currentChat] = [];
+  chatMsgs[currentChat].push({me:true,text:inp.value});
+  inp.value = '';
+  displayChat();
+  
+  setTimeout(() => {
+    chatMsgs[currentChat].push({me:false,text:'That sounds great! 😊'});
+    displayChat();
+  }, 1000);
+}
+
+function displayChat(){
+  const cont = document.getElementById('chat-messages');
+  cont.innerHTML = (chatMsgs[currentChat] || []).map(m => `
+    <div style="margin:8px 0;display:flex;${m.me?'justify-content:flex-end':''};">
+      <div style="background:${m.me?'var(--primary)':'var(--surface-2)'};color:${m.me?'#fff':'var(--text-primary)'};padding:8px 12px;border-radius:10px;max-width:70%;font-size:12px;">${m.text}</div>
+    </div>
+  `).join('');
+  cont.scrollTop = cont.scrollHeight;
+}
+
+function updateProfileView(){
+  document.getElementById('pv-photo').src = userProfile.photo || '🇪🇹👤';
+  document.getElementById('pv-name').textContent = userProfile.name + ', ' + userProfile.age;
+  document.getElementById('pv-basic').textContent = userProfile.profession + ' • ' + userProfile.region;
+  document.getElementById('pv-bio').textContent = userProfile.bio || 'No bio yet';
+  document.getElementById('pv-details').innerHTML = `
+    <div>📍 ${userProfile.region}</div>
+    <div>🙏 ${userProfile.religion}</div>
+    <div>📏 ${userProfile.height}cm • ⚖️ ${userProfile.weight}kg</div>
+    <div>🎓 ${userProfile.education}</div>
+    <div>💼 ${userProfile.profession}</div>
+    <div>🎮 Hobbies: ${userProfile.hobbies}</div>
+    <div>💭 Looking for: ${userProfile.relationship}</div>
+  `;
+}
+
+function updateProfile(){
+  userProfile.name = document.getElementById('edit-name').value || userProfile.name;
+  userProfile.age = document.getElementById('edit-age').value || userProfile.age;
+  userProfile.region = document.getElementById('edit-region').value || userProfile.region;
+  userProfile.religion = document.getElementById('edit-religion').value || userProfile.religion;
+  userProfile.height = document.getElementById('edit-height').value || userProfile.height;
+  userProfile.weight = document.getElementById('edit-weight').value || userProfile.weight;
+  userProfile.skin = document.getElementById('edit-skin').value || userProfile.skin;
+  userProfile.hair = document.getElementById('edit-hair').value || userProfile.hair;
+  userProfile.education = document.getElementById('edit-education').value || userProfile.education;
+  userProfile.profession = document.getElementById('edit-profession').value || userProfile.profession;
+  userProfile.hobbies = document.getElementById('edit-hobbies').value || userProfile.hobbies;
+  userProfile.relationship = document.getElementById('edit-relationship').value || userProfile.relationship;
+  userProfile.bio = document.getElementById('edit-bio').value || userProfile.bio;
+  
+  updateProfileView();
+  alert('✅ Profile updated!');
+  go('s-profile-view');
+}
+
+function go(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  
+  if(id === 's-dating') loadProfiles();
+  if(id === 's-matches') loadMatches();
+  if(id === 's-messages') loadMessages();
+  if(id === 's-edit-profile') {
+    document.getElementById('edit-photo-preview').src = userProfile.photo || '🇪🇹👤';
+    document.getElementById('edit-name').value = userProfile.name || '';
+    document.getElementById('edit-age').value = userProfile.age || '';
+    document.getElementById('edit-region').value = userProfile.region || '';
+    document.getElementById('edit-religion').value = userProfile.religion || '';
+    document.getElementById('edit-height').value = userProfile.height || '';
+    document.getElementById('edit-weight').value = userProfile.weight || '';
+    document.getElementById('edit-skin').value = userProfile.skin || '';
+    document.getElementById('edit-hair').value = userProfile.hair || '';
+    document.getElementById('edit-education').value = userProfile.education || '';
+    document.getElementById('edit-profession').value = userProfile.profession || '';
+    document.getElementById('edit-hobbies').value = userProfile.hobbies || '';
+    document.getElementById('edit-relationship').value = userProfile.relationship || '';
+    document.getElementById('edit-bio').value = userProfile.bio || '';
+  }
+  if(id === 's-profile-view') updateProfileView();
+}
+</script>
+
+</body>
+</html>
